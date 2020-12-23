@@ -1,0 +1,225 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+.Banner {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  height: 80px;
+  /* background-image: url('../images/888.jpg'); */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  opacity: 0.8;
+
+}
+
+.evenements{
+  position:relative;
+  display:block;
+  top:0;
+  left:0;
+  width:300px;
+  height:500px;
+  margin:0px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  transform:rotate(-90deg) translateY(-250px);
+  transform-origin:right top;
+}
+
+.evenements > div{
+  position:relative;
+  display:block;
+  padding:15px;
+  margin:0px;
+  transform:rotate(90deg);
+  transform-origin: right top;
+}
+
+.liste {
+  background-color: white;
+  display:flex;
+  overflow-x: auto;
+
+}
+
+/* Les éléments globaux */
+.titrePage {
+  text-shadow: #000000 1px 1px, #000000 -1px 1px, #000000 -1px -1px, #000000 1px -1px;
+  color:#EFB509;
+  text-align: center
+}
+
+/* Les evenements */
+.events{
+  background-color: #191a1a71;
+  padding: 25px;
+}
+
+.evenement h2{
+  color: #fff;
+}
+.evenement .list{
+  display:flex;
+  overflow-x: auto;
+} 
+.evenement  .carte{
+  padding-left: 15px;
+  color: white;
+  transition: transform 0.25s;
+}
+
+.cinema, .exposition{
+  background-color: #3C6382;
+} 
+.theatre{
+  background-color: #E55039;
+} 
+.concert{
+  background-color: #F6E58D;
+} 
+.concert  .carte{
+  padding-left: 15px;
+  color: black;
+  transition: transform 0.25s;
+}
+
+.evenement img{
+  height: 200px;
+  }
+
+  .evenement img:hover{
+    transform:scale(1.05);
+    border: 5px solid #EFB509;
+    cursor:pointer
+  }
+
+
+/* Page profil */
+
+  .center-image{
+    display:flex;
+    flex-direction: row;
+    justify-content:center; /* horizontally center */
+    align-items:center;    /* vertically center */
+  
+  }
+  .center-image img{
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+  }
+
+
+
+
+
+
+
+
+
+
+  .Login-page{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    height:40vh;
+ 
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+  
+    }
+
+.Login-input{
+  margin: 15px;
+  width: 400px;
+}
+
+.Sign {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 15px;
+    border-radius: 5%;
+    border-color: white;
+    background-color: rgba(63,169,255,0.5);
+    margin: 40px;
+}
+
+.Sign .Login-input{
+  width: 250px;
+}
+
+
+
+
+
+/* Sortie */
+.orgaSortie{
+  display: flex;
+  flex-direction: row;
+}
+
+.amisInvites{
+  display: flex;
+  flex-direction: row;
+  background-color: #F8F5F2;
+  padding: 10px;
+  border: 3px solid #191a1a71;
+  margin: 10px
+  }
+
+.amisInvites img{
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+
+.flexcolumn{
+  display: flex;
+  flex-direction: column; 
+}
+
+/* Fin des films et séries */
