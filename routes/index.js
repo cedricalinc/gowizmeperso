@@ -7,13 +7,11 @@ var sortieModel = require('../models/sorties')
 var friendRequestModel = require('../models/friendRequest')
 
 /* GET home page. */
-// router.get('/', function (req, res, next) { 
-//   res.render('../reactapp/App', { title: 'Express' });
-// });
-
 router.get('/', function (req, res, next) { 
-  res.redirect('../reactapp/src/components/App');
+  res.render('../reactapp/src/components/App', { title: 'Express' });
 });
+
+
 
 
 //=============================== PARTIE UTILISATEUR ======================================
