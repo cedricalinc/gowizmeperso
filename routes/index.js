@@ -7,8 +7,12 @@ var sortieModel = require('../models/sorties')
 var friendRequestModel = require('../models/friendRequest')
 
 /* GET home page. */
+// router.get('/', function (req, res, next) { 
+//   res.render('../reactapp/App', { title: 'Express' });
+// });
+
 router.get('/', function (req, res, next) { 
-  res.render('../reactapp/App', { title: 'Express' });
+  res.redirect('../reactapp/App');
 });
 
 
