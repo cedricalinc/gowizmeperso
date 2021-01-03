@@ -1,13 +1,3 @@
-// var express = require('express');
-// var router = express.Router();
-
-// /* GET home page. */
-// router.get('/', function(req, res, next) {
-//   res.json();
-// });
-
-// module.exports = router;
-
 
 
 var express = require('express');
@@ -23,6 +13,137 @@ router.get('/', function (req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
+
+//=============================== PARTIE UTILISATEUR ======================================
+
+var userModel = require('../models/users')
+var SHA256 = require("crypto-js/sha256");
+var encBase64 = require("crypto-js/enc-base64");
+var uid2 = require("uid2");
+
+// INSCRIPTION
+router.post('/sign-up', async function(req,res,next){
+
+  var error = []
+  var result = false
+  var saveUser = null
+
+  const data = await userModel.findOne({
+    email: req.body.emailCreation
+  })
+
+  console.log("DATA", data)
+
+  if(req.body.prenomCreation == ''
+  || req.body.nomCreation == ''
+  || req.body.villeCreation == ''
+  || req.body.emailCreation == ''
+  || req.body.passwordCreation == ''
+  ){
+    error.push('champs vides')
+  } else  if(data != null){
+    error.push('utilisateur déjà présent') 
+  } else if(error.length == 0){
+
+    var salt = uid2(32);
+    var newUser = new userModel ({
+    salt : salt,
+    token : uid2(32),
+    nom : req.body.nomCreation.toLowerCase(),
+    prenom : req.body.prenomCreation.toLowerCase(),
+    email : req.body.emailCreation.toLowerCase(),
+    mot_de_passe : SHA256(req.body.passwordCreation + salt).toString(encBase64),
+    avatar : 'https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_1280.png',
+    ville : req.body.villeCreation.toLowerCase(),
+    amis : [],
+    groupes : [],
+    conversations : [],
+    preferences : [{
+      cinema : true,
+      theatre: true,
+      exposition: true,
+      concert: true,
+      fantastique: true,
+      scienceFiction:  true,
+      comedie: true,
+      drame: true,
+      spectacleMusical: true,
+      contemporain: true,
+      oneManShow: true,
+      musiqueClassique: true,
+      musiqueFrancaise: true,
+      musiquePop: true,
+      musiqueRock: true,
+      beauxArts : true,
+      histoireCivilisations: true,
+  }],
+    confidentialite : true,
+    favoris : [],
+    sorties : []
+  });
+  
+    saveUser = await newUser.save()
+
+    
+    if(saveUser){
+      result = true
+    }
+  }
+
+ 
+
+
+  res.json({result, saveUser, error})
+})
+
+
+
+// CONNEXION 
+router.post('/sign-in', async function(req,res,next){
+
+  var result = false
+  var user = null
+  var error = []
+ 
+  
+  if(req.body.emailConnexion == ''
+  || req.body.passwordConnexion == ''
+  ){
+    error.push('champs vides')
+  }
+
+  if(error.length == 0){
+    var user = await userModel.findOne({ email: req.body.emailConnexion.toLowerCase() });
+    if (!user){
+      error.push('Email inconnu')
+    } else {
+    // var user = await userModel.findOne({ email: req.body.emailConnexion });
+    var hash = SHA256(req.body.passwordConnexion + user.salt).toString(encBase64);
+    console.log('user.salt',user.salt)
+    console.log("hash", hash)
+    console.log("user", user)
+    
+    if(hash === user.mot_de_passe){
+      result = true
+    } else {
+      error.push('Mot de passe incorrect')
+    }
+  }}
+  
+  res.json({result, user, error})
+})
+
+
+
+router.post('/profil', async function (req, res, next) {
+  console.log("ID AMI --------------", req.body.id)
+  const user = await userModel.findById(req.body.id)
+  console.log("mmmmmmmmmmmmmmmmmmmmmmmmmmm",user)
+  res.json(user);
+});
+
+
+//==================== PARTIE EVENEMENTS ============================================
 
 // Route pour récupérer l'ensemble des évènements --> SCREEN des évènements
 // TESTE POSTMAN : OK
@@ -44,20 +165,16 @@ router.post('/pullEventDetaille', async function (req, res, next) {
 
 // Route pour ajout de like :  ajouter l'id de l'utilisateur à la liste des likes de l'évènement et ajouter l'id du film au tableau de likes de l'utilisateur
 // TESTE POSTMAN : OK
-router.get('/likeEvent', async function (req, res, next) {
+router.post('/likeEvent', async function (req, res, next) {
 
-  // console.log("event", req.query.idEvent)
-  // console.log("user", req.query.idUser)
-  // console.log("token", req.query.token)
-
-  var idEvent = req.query.idEvent;
-  var idUser = req.query.idUser;
-  var token = req.query.token;
+  var idEvent = req.body.idEvent;
+  var idUser = req.body.idUser;
+  console.log("IDEVENT", idEvent)
+  console.log("IDUSER", idUser)
 
   var event;
   var user;
 
-  try {
     evenementModel.findOneAndUpdate(
       { _id: idEvent },
       { $push: { popularite: idUser } },
@@ -82,19 +199,16 @@ router.get('/likeEvent', async function (req, res, next) {
     event = evenementModel.findById(idEvent);
     user = userModel.findById(idUser);
 
-  } catch (e) {
-    // console.log(e);
-  }
   res.json({ event: event.popularite, user: user.favoris });
 });
 
 
 // Route pour retrait de like :  ajouter l'id de l'utilisateur à la liste des likes de l'évènement et ajouter l'id du film au tableau de likes de l'utilisateur
 // TESTE POSTMAN : OK
-router.get('/unlikeEvent', async function (req, res, next) {
+router.post('/unlikeEvent', async function (req, res, next) {
 
-  var idEvent = req.query.idEvent;
-  var idUser = req.query.idUser;
+  var idEvent = req.body.idEvent;
+  var idUser = req.body.idUser;
 
   var event;
   var user;
@@ -142,11 +256,12 @@ router.get('/unlikeEvent', async function (req, res, next) {
 
 
 
-// ---------------------------------------ROUTES SORTIES------------------------------------------
+// =========================== PARTIE SORTIES ==================================================
 
 // ROUTE POUR CREER UNE SORTIE
 // TEST POSTMAN : OK
 router.post('/addSortie', async function (req, res, next) {
+ console.log('=============== CREATION SORTIE ===================')
 
   var idEvenement;
 
@@ -166,8 +281,8 @@ router.post('/addSortie', async function (req, res, next) {
       image: req.body.image,
       adresse: req.body.adresse,
       cp: req.body.cp,
-      date_debut: req.body.debut,
-      date_fin: req.body.fin,
+      date_debut: req.body.date_debut,
+      date_fin: req.body.date_fin,
       duree: req.body.duree,
       type: req.body.type,
       participants: convives
@@ -182,8 +297,8 @@ router.post('/addSortie', async function (req, res, next) {
       image: req.body.image,
       adresse: req.body.adresse,
       cp: req.body.cp,
-      date_debut: req.body.debut,
-      date_fin: req.body.fin,
+      date_debut: req.body.date_debut,
+      date_fin: req.body.date_fin,
       duree: req.body.duree,
       type: req.body.type,
       participants: convives
@@ -196,8 +311,8 @@ router.post('/addSortie', async function (req, res, next) {
       image: req.body.image,
       adresse: req.body.adresse,
       cp: req.body.cp,
-      date_debut: req.body.debut,
-      date_fin: req.body.fin,
+      date_debut: req.body.date_debut,
+      date_fin: req.body.date_fin,
       duree: req.body.duree,
       type: req.body.type,
     });
@@ -255,8 +370,9 @@ router.post('/addSortie', async function (req, res, next) {
 // LECTURE D'UNE SORTIE
 // TEST POSTMAN : OK
 router.post('/pullSortieDetaillee', async function (req, res, next) {
-  // console.log("req post id recup", req.body.id)
+  console.log("req post id recup", req.body.id)
   var sortie = await sortieModel.findById(req.body.id)
+  console.log("SORTIE ===============", sortie)
 
   var listAmisSortie = [];
   for (var amis of sortie.participants) {
@@ -270,178 +386,31 @@ router.post('/pullSortieDetaillee', async function (req, res, next) {
 });
 
 
+router.post('/pullAmi', async function (req, res, next) {
 
+   console.log("<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ON COMMENCE ICI >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
+  console.log(req.body.id)
+  // const user = await userModel.findById( req.body.id )
+  const user = await userModel.findOne({ _id: req.body.id })
 
-
-// RECUPERATION DES AMIS
-router.post('/pullFriendsList', async function (req, res, next) {
-  // console.log("req post id recup", req.body.id)
-  const user = await userModel.findById(req.body.id)
-
-  var listAmis = [];
-  for (var amis of user.amis) {
-    var donneesAmis = await userModel.findById(amis)
-    // console.log("donneesAmis",donneesAmis)
-    listAmis.push(donneesAmis)
+  var idUser = user.id
+ 
+  var sorties = []
+  var sortiesUser = user.sorties
+  console.log("USER SORTIES", user.sorties)
+  for (var listSorties of sortiesUser) {
+    var sortiesTrans = await sortieModel.findById(listSorties)
+    sorties.push(sortiesTrans)
   }
-  // console.log("listAmis ", listAmis)
+  console.log("<<<<<<<<<<<<<<<<<<<<<mes sorties ",sorties)
 
-  res.json({ listAmis });
-});
-
-
-
-// CHERCHER DES AMIS 
-router.post('/searchFriends', async function (req, res, next) {
-
-  try{
-  // fonction pour mettre une majuscule à toute première lettre de recherche, comme dans la BDD
-  function strUcFirst(a) { return (a + '').charAt(0).toUpperCase() + a.substr(1); }
-
-  const resultatsRecherche = await userModel.find({ nom: strUcFirst(req.body.nom) })
-  // const resultatsRecherche = await userModel.find({ nom: strUcFirst(req.body.nom) } $or {prenom : strUcFirst(req.body.nom)})
-  res.json(resultatsRecherche);
-  }catch(e){
-    console.log(e)
-  }
-});
-
-// Route creation Demande  amis 
-router.post('/demandeFriend', async function (req, res, next) {
-  
-  console.log();
-  console.log("INDEX.JS, route: /demandeFriend");
-  console.log("req.body.token=", req.body.token);
-  console.log("req.body.idAmi=", req.body.idAmi);
-
-  var result = {status : false}
-  try{
-    var user = await userModel.findOne({token : req.body.token});
-    console.log(user);
-    const newDemande = new friendRequestModel({
-      demandeur: user._id,
-      receveur: req.body.idAmi,
-      statut: true
-    })
-  
-    result.response = await newDemande.save();
-    result.status = true;
-  }catch(e){
-    result.error = e;
-    console.log(e);
-  }
-  console.log("result=",result);
-
-  res.json(result);
+  // mes likes (OK)
+  const likes = await evenementModel.find({ popularite: idUser })
+  // console.log("mesLikes ", mesLikes)
+  res.json({ user, sorties, likes })
 
 });
-
-
-
-
-
-// Route recherche les Demandes  d'amis 
-router.post('/findDemandes', async function (req, res, next) {
-  
-  console.log();
-  console.log("INDEX.JS, route: /findDemandes");
-  console.log("req.body.token=", req.body.token);
-
-  var result = {status : false}
-
-  // try{
-    var user = await userModel.findOne({token : req.body.token});
-  //   console.log("ROUTE FIND DEMANDES / USER._ID=>>>>>>>",user._id)
-  //   result.response = await friendRequestModel.find({receveur:user._id});
-  //   result.status = true;
-  // }catch(e){
-  //   result.error = e;
-  //   console.log(e);
-  // }
-  // console.log("result=",result);
-  // console.log()
-
-  var listeDesDemandes = await friendRequestModel.find({receveur : user._id})
-
-    var idDeMesDemandeurs=[]
-      
-    for (var listId of listeDesDemandes) {
-      idDeMesDemandeurs.push(listId.demandeur)
-    }
-
-    console.log("idDeMesDemandeurs",idDeMesDemandeurs)
-
-    var demandeurs=[]
-    for (var futursAmis of idDeMesDemandeurs) {
-      var liteDesDemandes = await userModel.findById(futursAmis)
-      demandeurs.push(liteDesDemandes)
-    }
-
-    console.log("demandeurs",demandeurs)
-
-  res.json(demandeurs);
-
-});
-
-// Route recherche les Demandes  d'amis 
-router.post('/accepteDemande', async function (req, res, next) {
-  
-  console.log();
-  console.log("INDEX.JS, route: /findDemandes");
-  console.log("req.body.token=", req.body.token);
-
-  var idAmi = req.body.idDemandeur;
-  var result = {status : false}
-  try{
-    var user1 = await userModel.findOneAndUpdate(
-      {token : req.body.token}, 
-      {$push : {idAmi}}
-    );
-    var idUser = user1._id;
-    var user2 = await userModel.findOneAndUpdate(
-      {id : idAmis}, 
-      {$push : {idUser}}
-    );
-    var remove = await friendRequestModel.remove({receveur : idUser, demandeur: idAmi })
-    result.status = true;
-  }catch(e){
-    result.error = e;
-    console.log(e);
-  }
-  console.log("result=",result);
-  console.log()
-
-  res.json(result);
-
-});
-
-// Route suppresion une Demande  d'amis 
-router.post('/delDemande', async function (req, res, next) {
-  
-  console.log();
-  console.log("INDEX.JS, route: /findDemandes");
-  console.log("req.body.token=", req.body.token);
-
-  var idAmi = req.body.idDemandeur;
-  var result = {status : false}
-  try{
-    var user1 = await userModel.findOne({token : req.body.token});
-    var idUser = user1._id;
-    result.response = await friendRequestModel.remove({receveur : idUser, demandeur: idAmi})
-    result.status = true;
-  }catch(e){
-    result.error = e;
-    console.log(e);
-  }
-  console.log("result=",result);
-  console.log()
-
-  res.json(result);
-
-});
-
-
 
 
 // Route pour récupérer l'ensemble des informations de l'utilisateur --> SCREEN des évènements
@@ -634,6 +603,161 @@ res.json()
 
 
 
+// =================================== PARTIE AMIS =======================================================
+
+// RECUPERATION DES AMIS
+router.post('/pullFriendsList', async function (req, res, next) {
+  // console.log("req post id recup", req.body.id)
+  const user = await userModel.findById(req.body.id)
+
+  var listAmis = [];
+  for (var amis of user.amis) {
+    var donneesAmis = await userModel.findById(amis)
+    // console.log("donneesAmis",donneesAmis)
+    listAmis.push(donneesAmis)
+  }
+  // console.log("listAmis ", listAmis)
+
+  res.json({ listAmis });
+});
+
+
+
+// CHERCHER DES AMIS 
+router.post('/searchFriends', async function (req, res, next) {
+
+  const resultatsRecherche = await userModel.find({ nom: req.body.nom.toLowerCase() })
+  res.json(resultatsRecherche);
+ 
+});
+
+// Route creation Demande  amis 
+router.post('/demandeFriend', async function (req, res, next) {
+  
+  console.log();
+  console.log("INDEX.JS, route: /demandeFriend");
+  console.log("req.body.token=", req.body.token);
+  console.log("req.body.idAmi=", req.body.idAmi);
+
+  var result = {status : false}
+  try{
+    var user = await userModel.findOne({token : req.body.token});
+    console.log(user);
+    const newDemande = new friendRequestModel({
+      demandeur: user._id,
+      receveur: req.body.idAmi,
+      statut: true
+    })
+  
+    result.response = await newDemande.save();
+    result.status = true;
+  }catch(e){
+    result.error = e;
+    console.log(e);
+  }
+  console.log("result=",result);
+
+  res.json(result);
+
+});
+
+
+
+
+
+// Route recherche les Demandes  d'amis 
+router.post('/findDemandes', async function (req, res, next) {
+  
+  var result = {status : false}
+
+   
+  var listeDesDemandes = await friendRequestModel.find({receveur : req.body.id})
+
+    var idDeMesDemandeurs=[]
+      
+    for (var listId of listeDesDemandes) {
+      idDeMesDemandeurs.push(listId.demandeur)
+    }
+
+    console.log("idDeMesDemandeurs",idDeMesDemandeurs)
+
+    var demandeurs=[]
+    for (var futursAmis of idDeMesDemandeurs) {
+      var liteDesDemandes = await userModel.findById(futursAmis)
+      demandeurs.push(liteDesDemandes)
+    }
+
+    console.log("demandeurs",demandeurs)
+
+  res.json(demandeurs);
+
+});
+
+// Route recherche les Demandes  d'amis 
+router.post('/accepteDemande', async function (req, res, next) {
+  var idAmi = req.body.idDemandeur;
+  var idUtilisateur = req.body.id;
+  console.log("ID AMI --- ", idAmi)
+  console.log("ID UTILISATEUR --- ", idUtilisateur)
+
+
+    userModel.findOneAndUpdate(
+      { _id: idUtilisateur },
+      { $push: { amis: idAmi } },
+      function (error, success) {
+        if (error) {
+          console.log("ERROR USER", error);
+        } else {
+          console.log("SUCCESS USER", success);
+        }
+      });
+
+      userModel.findOneAndUpdate(
+        { _id: idAmi },
+        { $push: { amis: idUtilisateur } },
+        function (error, success) {
+          if (error) {
+            console.log("ERROR AMI", error);
+          } else {
+            console.log("SUCCESS AMI", success);
+          }
+        });
+
+        var remove = await friendRequestModel.deleteOne({receveur : idUtilisateur, demandeur: idAmi })
+  
+   console.log("ACCEPTATION DEMANDE =====================================")
+
+  res.json({result: true});
+
+});
+
+// Route suppresion une Demande  d'amis 
+
+  router.post('/delDemande', async function (req, res, next) {
+    var idAmi = req.body.idDemandeur;
+    var idUtilisateur = req.body.id;
+    console.log("ID AMI --- ", idAmi)
+    console.log("ID UTILISATEUR --- ", idUtilisateur)
+  
+  await friendRequestModel.deleteOne({receveur : idUtilisateur, demandeur: idAmi })
+  
+  console.log("DELETION DEMANDE =====================================")
+
+ res.json({result: true});
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -651,7 +775,7 @@ res.json()
 
 
 // ---------------------------------------ADMINISTRATION DE LA BDD VIA POSTMAN------------------------------------------
-router.post('/addevent', async function (req, res, next) {
+router.post('/addeventPostman', async function (req, res, next) {
   //Ajout d'un évènement avec un créneau 
   var newEvent = new evenementModel({
     nom: req.body.nom,
@@ -677,7 +801,7 @@ router.post('/addevent', async function (req, res, next) {
 });
 
 
-router.post('/addeventlieu', async function (req, res, next) {
+router.post('/addeventlieuPostman', async function (req, res, next) {
   //Ajout de créneaux à un évènement spécifique via son id
   var idEvenement = '5fce47f76697a656d4d4ea77'
   evenementModel.findOneAndUpdate(
@@ -706,7 +830,7 @@ router.post('/addeventlieu', async function (req, res, next) {
 });
 
 
-router.post('/addsortie', async function (req, res, next) {
+router.post('/addsortiePostman', async function (req, res, next) {
   //Ajout d'un évènement avec un créneau 
   var newSortie = new sortieModel({
     evenementLie: req.body.evenementLie,

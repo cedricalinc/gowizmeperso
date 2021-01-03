@@ -128,8 +128,8 @@
   }
 
   .evenement img:hover{
-    transform:scale(1.05);
-    border: 5px solid #EFB509;
+    transform:scale(1.1);
+    /* border: 5px solid #EFB509; */
     cursor:pointer
   }
 
@@ -212,8 +212,8 @@
   }
 
 .amisInvites img{
-  width: 50px;
-  height: 50px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
 }
 

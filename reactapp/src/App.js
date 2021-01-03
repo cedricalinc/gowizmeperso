@@ -27,7 +27,7 @@
 
 
 import React from 'react';
-import {BrowserRouter as Router, Switch, Route} from 'react-router-dom'
+import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 // CHEMIN VERS LES COMPOSANTS REUTILISES DANS LES DIRECTIONS DU RETURN
@@ -38,6 +38,7 @@ import CreaSortie from './components/CreaSortie';
 import DetailSortie from './components/DetailSortie';
 import Planifier from './components/Planifier';
 import Profil from './components/Profil';
+import ProfilAmi from './components/ProfilAmi';
 import DetailEvenement from './components/DetailEvenement';
 
 // MISE EN PLACE DU REDUX
@@ -49,9 +50,10 @@ import idEventReducer from './reducers/idEvent.reducer';
 import idSortieReducer from './reducers/idSortie.reducer';
 import newSortieReducer from './reducers/newSortie.reducer';
 import idUserReducer from './reducers/idUser.reducer';
+import idAmiReducer from './reducers/idAmi.reducer';
 import userReducer from './reducers/user.reduceur';
 
-const store = createStore(combineReducers({tokenReducer,idEventReducer,idSortieReducer,newSortieReducer,idUserReducer, userReducer}));
+const store = createStore(combineReducers({tokenReducer,idEventReducer,idSortieReducer,newSortieReducer,idUserReducer, userReducer,idAmiReducer}));
 
 
 function App() {
@@ -67,6 +69,7 @@ function App() {
           <Route component={DetailSortie} path="/sortie" exact />
           <Route component={Planifier} path="/planifier" exact />
           <Route component={Profil} path="/profil" exact />
+          <Route component={ProfilAmi} path="/profilAmi" exact />
           <Route component={Amis} path="/amis" exact />
           <Route component={DetailEvenement} path="/evenement" exact />
 

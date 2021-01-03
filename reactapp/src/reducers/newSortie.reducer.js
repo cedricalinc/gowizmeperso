@@ -1,5 +1,6 @@
+// eslint-disable-next-line
 export default function(newSortie = {}, action) {
-    if(action.type == 'newSortie') {
+    if(action.type === 'newSortie') {
         // console.log("transfert des infos sur la sorties au screen PlanOrgaScreen", action.newSortie);
         return action.newSortie;
         
