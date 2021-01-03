@@ -8,7 +8,8 @@ var friendRequestModel = require('../models/friendRequest')
 
 /* GET home page. */
 router.get('/', function (req, res, next) { 
-  res.render('index', { title: 'Express' });
+  // res.render('index', { title: 'Express' });
+  res.sendFile(path.join(__dirname, 'build', 'App.js'));
 });
 
 
