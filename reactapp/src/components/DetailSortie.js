@@ -8,7 +8,7 @@ import fond from '../images/Wavey-Fingerprint.svg'
 function DetailSortie(props) {
   const [infoSortie, setInfoSortie] = useState({});
   
-
+  // UseEffect pour récupérer les informations du détail de la sortie en transmettant l'ID Sortie stocké en REDUX
   useEffect(() => {
     const getSortieDetails = async () => {
       // console.log(props.idSortie);
@@ -18,42 +18,36 @@ function DetailSortie(props) {
         body: `id=${props.idSortie}`
       })
       const body = await data.json()
-      // console.log(body)
       setInfoSortie(body);
     }
     getSortieDetails()
      // eslint-disable-next-line 
   }, [])
 
-  var contenu
-  var affichageContenu = () => {
-    if (infoSortie.sortie !== undefined) { 
+    // Fonction d'affichage de données de sortie avec gestion d'erreur ou de temps de chargement
+    // si undefined, alors on affiche les catégories avec "Aucune information", sinon on affiche les bonnes données
+    var contenu
+    var affichageContenu = () => {
+      if (infoSortie.sortie !== undefined) { 
+        contenu = 
+          <div class="orgaSortie">
+            <div>
+              <img style={{height: '300px', marginRight:'15px'}} src={infoSortie.sortie.image} alt='' />
+            </div>
+            <div>
+              <h1 style={{color:'#EFB509'}}><span style={{color:'white'}}>Sortie : </span>{infoSortie.sortie.nomSortie}</h1>
+                <h2 style={{color:'#EFB509'}}><span style={{color:'white'}}>Lieu de la sortie : </span>{infoSortie.sortie.adresse} </h2>
+                <h2 style={{color:'#EFB509'}}><span style={{color:'white'}}>Code postal : </span>{infoSortie.sortie.cp} </h2>
+                <h2 style={{color:'#EFB509'}}><span style={{color:'white'}}>Type : </span>{infoSortie.sortie.type} </h2>
+                <h2 style={{color:'#EFB509'}}><span style={{color:'white'}}>Date et horaires de début : </span>{infoSortie.sortie.date_debut}</h2>
+                <h2 style={{color:'#EFB509'}}><span style={{color:'white'}}>Date et horaires de fin : </span>{infoSortie.sortie.date_fin}</h2>
+                <h2 style={{color:'#EFB509'}}><span style={{color:'white'}}>Durée : </span>{infoSortie.sortie.duree} minutes </h2>
+            </div>
+          </div>
+      } else {
       contenu = 
       <div class="orgaSortie">
-      <div>
-        <img style={{height: '300px', marginRight:'15px'}} src={infoSortie.sortie.image} alt='' />
-      </div>
-
-
-      <div>
-        <h1 style={{color:'#EFB509'}}><span style={{color:'white'}}>Sortie : </span>{infoSortie.sortie.nomSortie}</h1>
-          <h2 style={{color:'#EFB509'}}><span style={{color:'white'}}>Lieu de la sortie : </span>{infoSortie.sortie.adresse} </h2>
-          <h2 style={{color:'#EFB509'}}><span style={{color:'white'}}>Code postal : </span>{infoSortie.sortie.cp} </h2>
-          <h2 style={{color:'#EFB509'}}><span style={{color:'white'}}>Type : </span>{infoSortie.sortie.type} </h2>
-          <h2 style={{color:'#EFB509'}}><span style={{color:'white'}}>Date et horaires de début : </span>{infoSortie.sortie.date_debut}</h2>
-          <h2 style={{color:'#EFB509'}}><span style={{color:'white'}}>Date et horaires de fin : </span>{infoSortie.sortie.date_fin}</h2>
-          <h2 style={{color:'#EFB509'}}><span style={{color:'white'}}>Durée : </span>{infoSortie.sortie.duree} minutes </h2>
-      </div>
-    </div>
-     } else {
-      contenu = 
-      <div class="orgaSortie">
-      <div>
-        {/* <img style={{height: '300px', marginRight:'15px'}} src={infoSortie.image} /> */}
-      </div>
-
-
-      <div>
+           <div>
         <h1 style={{color:'#EFB509'}}><span style={{color:'white'}}>Sortie : </span>Aucune information</h1>
           <h2 style={{color:'#EFB509'}}><span style={{color:'white'}}>Lieu de la sortie : </span>Aucune information </h2>
           <h2 style={{color:'#EFB509'}}><span style={{color:'white'}}>Code postal : </span>Aucune information</h2>
@@ -66,7 +60,7 @@ function DetailSortie(props) {
     }
   }
   
-
+  // Fonction (avec gestion de l'erreur) pour afficher les amis conviés avec mise en forme de leurs données nominatives
   affichageContenu();
   
   function strUcFirst(a) { return (a + '').charAt(0).toUpperCase() + a.substr(1); }
@@ -75,7 +69,7 @@ function DetailSortie(props) {
   var mapDemandes = () => {
     if (infoSortie.listAmisSortie === undefined) {
       amisConvies =
-        <h2>BUG</h2>
+        <h2>Erreur dans le chargement</h2>
     } else {
       amisConvies =infoSortie.listAmisSortie.map((ami, i) => {
         
@@ -100,21 +94,15 @@ function DetailSortie(props) {
         height: "100vh",
         marginBottom : '20px',
         backgroundImage:`url(${fond})` }}>
-         <Nav/>
 
-       
-                {/* <div style={{marginTop : '50px'}}>
-                <h1 class="titrePage">
-                        Détail de la sortie 
-                    </h1>
-                </div> */}
-             
+        {/* Barre de navigation */}
+        <Nav/>
+            
                 
-            <div class="orgaSortie">
+        <div class="orgaSortie">
           
               {/* Bloc pour la photo avec les infos de la sortie */}
                 <div style={{margin: '50px', marginRight:'100px'}}>
-                  
                   <h1 style={{color:'#EFB509'}}>Informations de la sortie</h1>
                  {contenu}
                 </div>
@@ -122,51 +110,21 @@ function DetailSortie(props) {
              
                   {/* Bloc pour afficher les amis conviés */}
                   <div style={{margin : '50px'}}>
-        
-                  <h1 style={{color:'#EFB509'}}>Ami.e.s convié.e.s </h1>
-                    
-                    {/* <div class="amisInvites">
-                      <img style={{marginRight:'15px'}} src={image} />
-                      <div class="flexcolumn" >
-                        <h5>Lydie PERRON </h5>
-                        <h6>Asnières-Sur-Seine</h6>
-                      </div>
-                    </div>
-                    <div class="amisInvites">
-                      <img style={{marginRight:'15px'}} src={image} />
-                      <div class="flexcolumn" >
-                        <h5>Lydie PERRON </h5>
-                        <h6>Asnières-Sur-Seine</h6>
-                      </div>
-                    </div>
-                    <div class="amisInvites">
-                      <img style={{marginRight:'15px'}} src={image} />
-                      <div class="flexcolumn" >
-                        <h5>Lydie PERRON </h5>
-                        <h6>Asnières-Sur-Seine</h6>
-                      </div>
-                    </div> */}
-{amisConvies}
+                    <h1 style={{color:'#EFB509'}}>Ami.e.s convié.e.s </h1>
+                    {amisConvies}
                   </div>
 
-                  
-                  </div>    
+        </div>    
                
-        </div>
+      </div>
 
-
-           
-    
       )
     }
 
+    // Récupération de l'id Sortie présent en REDUX pour récupérer les informations de la sortie à aficher
     function mapStateToProps(state) {
       return {
-        idUser: state.idUserReducer,
-        token: state.tokenReducer,
-        user: state.userReduceur,
-        idSortie: state.idSortieReducer,
-        currentCity: state.currentCityReducer
+        idSortie: state.idSortieReducer
       }
     }
     

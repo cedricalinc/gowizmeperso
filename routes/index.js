@@ -1,5 +1,3 @@
-
-
 var express = require('express');
 var router = express.Router();
 
@@ -16,12 +14,14 @@ router.get('/', function (req, res, next) {
 
 //=============================== PARTIE UTILISATEUR ======================================
 
+// Require nécessaires pour les différentes routes
 var userModel = require('../models/users')
 var SHA256 = require("crypto-js/sha256");
 var encBase64 = require("crypto-js/enc-base64");
 var uid2 = require("uid2");
 
 // INSCRIPTION
+// TEST POSTMAN : OK
 router.post('/sign-up', async function(req,res,next){
 
   var error = []
@@ -33,7 +33,7 @@ router.post('/sign-up', async function(req,res,next){
   })
 
   console.log("DATA", data)
-
+  //Si un des champs n'est pas rempli, alors erreur 'champs vides'
   if(req.body.prenomCreation == ''
   || req.body.nomCreation == ''
   || req.body.villeCreation == ''
@@ -41,10 +41,11 @@ router.post('/sign-up', async function(req,res,next){
   || req.body.passwordCreation == ''
   ){
     error.push('champs vides')
+    // Si la vérification montre qu'un utilisateur est déjà présent, erreur
   } else  if(data != null){
     error.push('utilisateur déjà présent') 
+    // Si pas d'erreur, alors on crée l'utilisateur
   } else if(error.length == 0){
-
     var salt = uid2(32);
     var newUser = new userModel ({
     salt : salt,
@@ -90,22 +91,20 @@ router.post('/sign-up', async function(req,res,next){
     }
   }
 
- 
-
-
   res.json({result, saveUser, error})
 })
 
 
 
 // CONNEXION 
+// TEST POSTMAN : OK
 router.post('/sign-in', async function(req,res,next){
 
   var result = false
   var user = null
   var error = []
  
-  
+  // Si un des deux champs est vide, alors erreur
   if(req.body.emailConnexion == ''
   || req.body.passwordConnexion == ''
   ){
@@ -114,10 +113,11 @@ router.post('/sign-in', async function(req,res,next){
 
   if(error.length == 0){
     var user = await userModel.findOne({ email: req.body.emailConnexion.toLowerCase() });
+    // si on ne trouve pas d'user, alors email inconnu
     if (!user){
       error.push('Email inconnu')
+    // si on trouve un utilisateur, alors on calcule le hash et on le compare
     } else {
-    // var user = await userModel.findOne({ email: req.body.emailConnexion });
     var hash = SHA256(req.body.passwordConnexion + user.salt).toString(encBase64);
     console.log('user.salt',user.salt)
     console.log("hash", hash)
@@ -125,6 +125,7 @@ router.post('/sign-in', async function(req,res,next){
     
     if(hash === user.mot_de_passe){
       result = true
+    // si erreur de comparaison alors le mot de passe est incorrect
     } else {
       error.push('Mot de passe incorrect')
     }
@@ -134,11 +135,11 @@ router.post('/sign-in', async function(req,res,next){
 })
 
 
-
+// Récupération des informations d'un utilisateur via son id
+// TEST POSTMAN : OK
 router.post('/profil', async function (req, res, next) {
   console.log("ID AMI --------------", req.body.id)
   const user = await userModel.findById(req.body.id)
-  console.log("mmmmmmmmmmmmmmmmmmmmmmmmmmm",user)
   res.json(user);
 });
 
@@ -146,7 +147,7 @@ router.post('/profil', async function (req, res, next) {
 //==================== PARTIE EVENEMENTS ============================================
 
 // Route pour récupérer l'ensemble des évènements --> SCREEN des évènements
-// TESTE POSTMAN : OK
+// TEST POSTMAN : OK
 router.get('/pullEvents', async function (req, res, next) {
   const events = await evenementModel.find()
   // console.log('route pullEvents', events);
@@ -155,7 +156,7 @@ router.get('/pullEvents', async function (req, res, next) {
 
 
 // Route pour récupérer un évènement spécifiquement --> SCREEN de la carte évènement détaillée
-// TESTE POSTMAN : OK
+// TEST POSTMAN : OK
 router.post('/pullEventDetaille', async function (req, res, next) {
   // console.log("req post id recup", req.body.id)
   const event = await evenementModel.findById(req.body.id)
@@ -164,7 +165,7 @@ router.post('/pullEventDetaille', async function (req, res, next) {
 
 
 // Route pour ajout de like :  ajouter l'id de l'utilisateur à la liste des likes de l'évènement et ajouter l'id du film au tableau de likes de l'utilisateur
-// TESTE POSTMAN : OK
+// TEST POSTMAN : OK
 router.post('/likeEvent', async function (req, res, next) {
 
   var idEvent = req.body.idEvent;
@@ -204,7 +205,7 @@ router.post('/likeEvent', async function (req, res, next) {
 
 
 // Route pour retrait de like :  ajouter l'id de l'utilisateur à la liste des likes de l'évènement et ajouter l'id du film au tableau de likes de l'utilisateur
-// TESTE POSTMAN : OK
+// TEST POSTMAN : OK
 router.post('/unlikeEvent', async function (req, res, next) {
 
   var idEvent = req.body.idEvent;
@@ -264,13 +265,15 @@ router.post('/addSortie', async function (req, res, next) {
  console.log('=============== CREATION SORTIE ===================')
 
   var idEvenement;
-
+  // Pour anticiper la création de sortie non liée à un évènement (fonctionnalité initialement désirée, non réalisée suite à revue des plannings de Gantt) et éviter une erreur de non transmission d'ID Event à la création de la sortie
   if (req.body.evenementLie == undefined) {
     idEvenement = 0
   } else {
     idEvenement = req.body.evenementLie
   }
 
+  // Selon le nombre d'invités transmis, 3 cas différents
+  // si plusieurs participants
   if (req.body.part != undefined && req.body.part.length > 1) {
     var convives = req.body.part.split(",")
 
@@ -287,6 +290,7 @@ router.post('/addSortie', async function (req, res, next) {
       type: req.body.type,
       participants: convives
     });
+    // si un seul participant
   } else if (req.body.part != undefined && req.body.part.length == 1) {
     var convives = req.body.part
 
@@ -304,6 +308,7 @@ router.post('/addSortie', async function (req, res, next) {
       participants: convives
     });
   } else {
+    //si aucun participant
     var newSortie = new sortieModel({
       evenementLie: idEvenement,
       organisateur: req.body.organisateur,
@@ -319,7 +324,6 @@ router.post('/addSortie', async function (req, res, next) {
   }
 
   var sortie = await newSortie.save();
-  // console.log("SORTIE CREEE", sortie)
 
   // LE CREATEUR EST EGALEMENT UN PARTICIPANT (FACON DE RECHERCHER POUR L'ECRAN PLANIFIER), DONC ON LUI AJOUTE L'ID SORTIE DANS SES SORTIES ET IDEM POUR LES SORTIES, AJOUT DE L'ID CREATEUR
   userModel.findOneAndUpdate(
@@ -373,7 +377,7 @@ router.post('/pullSortieDetaillee', async function (req, res, next) {
   console.log("req post id recup", req.body.id)
   var sortie = await sortieModel.findById(req.body.id)
   console.log("SORTIE ===============", sortie)
-
+// Récupération de l'ensemble des infos des amis pour affichage 
   var listAmisSortie = [];
   for (var amis of sortie.participants) {
     var donneesAmis = await userModel.findById(amis)
@@ -385,7 +389,8 @@ router.post('/pullSortieDetaillee', async function (req, res, next) {
   res.json({ sortie, listAmisSortie });
 });
 
-
+// Route pour récupérer les sorties et likes des amis pour le profil
+// TEST POSTMAN : OK
 router.post('/pullAmi', async function (req, res, next) {
 
    console.log("<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ON COMMENCE ICI >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
@@ -405,7 +410,6 @@ router.post('/pullAmi', async function (req, res, next) {
   }
   console.log("<<<<<<<<<<<<<<<<<<<<<mes sorties ",sorties)
 
-  // mes likes (OK)
   const likes = await evenementModel.find({ popularite: idUser })
   // console.log("mesLikes ", mesLikes)
   res.json({ user, sorties, likes })
@@ -414,7 +418,7 @@ router.post('/pullAmi', async function (req, res, next) {
 
 
 // Route pour récupérer l'ensemble des informations de l'utilisateur --> SCREEN des évènements
-// TESTE POSTMAN : a faire
+// TEST POSTMAN : OK
 router.post('/pullUser', async function (req, res, next) {
 
   // 1. je récupère l'utilisateur et de cet utilisateur :
@@ -560,7 +564,9 @@ router.post('/pullUser', async function (req, res, next) {
 
 
 
-
+// Route créée mais non usitée dans l'application et non mise dans la version web pour respecter le périmètre
+// Retrait des id dans chacune des collections
+// TEST POSTMAN : OK
 router.post('/desinscription', async function (req, res, next) {
 
   var idUser = req.body.idUser
@@ -606,6 +612,7 @@ res.json()
 // =================================== PARTIE AMIS =======================================================
 
 // RECUPERATION DES AMIS
+// TEST POSTMAN : OK
 router.post('/pullFriendsList', async function (req, res, next) {
   // console.log("req post id recup", req.body.id)
   const user = await userModel.findById(req.body.id)
@@ -624,6 +631,8 @@ router.post('/pullFriendsList', async function (req, res, next) {
 
 
 // CHERCHER DES AMIS 
+// TEST POSTMAN : OK
+
 router.post('/searchFriends', async function (req, res, next) {
 
   const resultatsRecherche = await userModel.find({ nom: req.body.nom.toLowerCase() })
@@ -632,6 +641,8 @@ router.post('/searchFriends', async function (req, res, next) {
 });
 
 // Route creation Demande  amis 
+// TEST POSTMAN : OK
+
 router.post('/demandeFriend', async function (req, res, next) {
   
   console.log();
@@ -666,6 +677,8 @@ router.post('/demandeFriend', async function (req, res, next) {
 
 
 // Route recherche les Demandes  d'amis 
+// TEST POSTMAN : OK
+
 router.post('/findDemandes', async function (req, res, next) {
   
   var result = {status : false}
@@ -693,7 +706,10 @@ router.post('/findDemandes', async function (req, res, next) {
 
 });
 
+
 // Route recherche les Demandes  d'amis 
+// TEST POSTMAN : OK
+
 router.post('/accepteDemande', async function (req, res, next) {
   var idAmi = req.body.idDemandeur;
   var idUtilisateur = req.body.id;
@@ -732,7 +748,7 @@ router.post('/accepteDemande', async function (req, res, next) {
 });
 
 // Route suppresion une Demande  d'amis 
-
+// TEST POSTMAN : OK
   router.post('/delDemande', async function (req, res, next) {
     var idAmi = req.body.idDemandeur;
     var idUtilisateur = req.body.id;

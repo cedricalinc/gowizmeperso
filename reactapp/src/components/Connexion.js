@@ -1,5 +1,5 @@
 // eslint-disable-next-line
-import React,{useState, useEffect} from 'react';
+import React,{useState} from 'react';
 import '../App.css';
 import Nav from './Nav'
 import {connect} from 'react-redux'
@@ -9,7 +9,6 @@ import {Redirect} from 'react-router-dom'
   
 
 function Connexion(props) {
-
 
   const [signUpPrenom, setSignUpPrenom] = useState('')
   const [signUpNom, setSignUpNom] = useState('')
@@ -22,9 +21,7 @@ function Connexion(props) {
   const [listErrorsSignin, setErrorsSignin] = useState([])
   const [listErrorsSignup, setErrorsSignup] = useState([])
 
-  
-
-
+  // Fonction de création de compte
   var handleSubmitSignup = async () => {
     //1. connexion back pour envoi des données vers BDD si contrôles OK
     const data = await fetch('/sign-up', {
@@ -34,51 +31,53 @@ function Connexion(props) {
     })
     //2. récupération des données transmises depuis le back
     const body = await data.json()
-    // console.log("Contenu du body",body)
-    //3. Si l'utilisateur 
+    //3. Si l'utilisateur n'est pas déjà présent en BDD, alors on stocke son token, son id et on modifie l'état userExists à True pour plus tard
     if(body.result === true){
       setUserExists(true)
       props.addToken(body.saveUser.token)
       props.addIdUser(body.saveUser._id)
-      console.log("BODY TOKEN",body.saveUser.token)
     } else {
+    //4. Si le résultat n'est pas à true, alors on affiche l'erreur retournée 
       setErrorsSignup(body.error)
     }
   }
 
-  console.log("TOKEN RECU",props.token)
-
-
+//  Fonction pour la connexion
   var handleSubmitSignin = async () => {
-     const data = await fetch('/sign-in', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: `emailConnexion=${signInEmail}&passwordConnexion=${signInPassword}`
+      //1. connexion back pour envoi des données vers BDD si contrôles OK
+      const data = await fetch('/sign-in', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: `emailConnexion=${signInEmail}&passwordConnexion=${signInPassword}`
     })
-    const body = await data.json()
-    if(body.result === true){
-      console.log("BODY",body)
-      setUserExists(true)
-      props.addToken(body.user.token)
-      props.addIdUser(body.user._id)
-          return <Redirect to='/' />
+      //2. récupération des données transmises depuis le back
+      const body = await data.json()
+      //3. Si l'utilisateur est présent en BDD, alors on stocke son token, son id et on le redirige vers la page principale --> connexion OK
+      if(body.result === true){
+        setUserExists(true)
+        props.addToken(body.user.token)
+        props.addIdUser(body.user._id)
+        return <Redirect to='/' />
 
-    }  else {
-      setErrorsSignin(body.error)
+      }  else {
+        setErrorsSignin(body.error)
+      }
     }
-  }
 
-  if(userExists){
-    return <Redirect to='/' />
-  }
+    // Si l'utilisateur est présent après création, alors direction la page principale
+    if(userExists){
+      return <Redirect to='/' />
+    }
+    
+    // maping des erreurs remontées depuis le Sign-In
+    var tabErrorsSignin = listErrorsSignin.map((error,i) => {
+      return(<p>{error}</p>)
+    })
 
-  var tabErrorsSignin = listErrorsSignin.map((error,i) => {
-    return(<p>{error}</p>)
-  })
-
-  var tabErrorsSignup = listErrorsSignup.map((error,i) => {
-    return(<p>{error}</p>)
-  })
+    // maping des erreurs remontées depuis le Sign-up
+    var tabErrorsSignup = listErrorsSignup.map((error,i) => {
+      return(<p>{error}</p>)
+    })
 
     return (
         <div  style={{ 
@@ -86,64 +85,58 @@ function Connexion(props) {
             height: "100vh",
             marginBottom : '20px',
             backgroundImage:`url(${fond})` }}>
-             <Nav/>
+             
+          {/* Barre de navigation */}
+          <Nav/>
  
-           
-                    
-      
+          <div className="Login-page" >
+
+          {/* SIGN-IN / Connexion */}
+
+          <div className="Sign">
+            <div style={{marginTop : '50px'}}>
+              <h1 class="titrePage">
+                  Connexion
+              </h1>
+            </div>
+                  
+            <Input onChange={(e) => setSignInEmail(e.target.value)} className="Login-input" placeholder="E-mail"  />
+
+            <Input.Password onChange={(e) => setSignInPassword(e.target.value)} className="Login-input" placeholder="Mot de passe" />
             
-                    <div className="Login-page" >
+            {tabErrorsSignin}
 
-{/* SIGN-IN */}
+            <Button onClick={() => handleSubmitSignin()}  style={{width:'130px'}} type="primary">Me connecter</Button>
 
-<div className="Sign">
-<div style={{marginTop : '50px'}}>
-                    <h1 class="titrePage">
-                            Connexion
-                        </h1>
-                    </div>
-        
-  <Input onChange={(e) => setSignInEmail(e.target.value)} className="Login-input" placeholder="E-mail"  />
+          </div>
 
-  <Input.Password onChange={(e) => setSignInPassword(e.target.value)} className="Login-input" placeholder="Mot de passe" />
-  
-  {tabErrorsSignin}
+        {/* SIGN-UP / Création */}
 
-  <Button onClick={() => handleSubmitSignin()}  style={{width:'130px'}} type="primary">Me connecter</Button>
+        <div className="Sign">
+          <div style={{marginTop : '50px'}}>
+            <h1 class="titrePage">
+              Inscription
+            </h1>
+          </div>
+                           
+          <Input onChange={(e) => setSignUpPrenom(e.target.value)} className="Login-input" placeholder="Prénom" />
+          <Input onChange={(e) => setSignUpNom(e.target.value)} className="Login-input" placeholder="Nom" />
+          <Input onChange={(e) => setSignUpVille(e.target.value)} className="Login-input" placeholder="Ville" />
+          <Input onChange={(e) => setSignUpEmail(e.target.value)} className="Login-input" placeholder="E-mail" />
+          <Input.Password onChange={(e) => setSignUpPassword(e.target.value)} className="Login-input" placeholder="Mot de passe" />
 
-</div>
+          {tabErrorsSignup}
 
-{/* SIGN-UP */}
+          <Button onClick={() => handleSubmitSignup()} style={{width:'130px'}} type="primary">M'inscrire</Button>
 
-<div className="Sign">
-<div style={{marginTop : '50px'}}>
-                    <h1 class="titrePage">
-                            Inscription
-                        </h1>
-                    </div>
-        
-        
-  <Input onChange={(e) => setSignUpPrenom(e.target.value)} className="Login-input" placeholder="Prénom" />
-  <Input onChange={(e) => setSignUpNom(e.target.value)} className="Login-input" placeholder="Nom" />
-  <Input onChange={(e) => setSignUpVille(e.target.value)} className="Login-input" placeholder="Ville" />
-
-  <Input onChange={(e) => setSignUpEmail(e.target.value)} className="Login-input" placeholder="E-mail" />
-  <Input.Password onChange={(e) => setSignUpPassword(e.target.value)} className="Login-input" placeholder="Mot de passe" />
-
-  {tabErrorsSignup}
-
-  <Button onClick={() => handleSubmitSignup()} style={{width:'130px'}} type="primary">M'inscrire</Button>
-
-</div>
-
-                    
-</div>
-                    </div>
+        </div>
+      </div>
+    </div>
     
       )
     }
 
-
+    // Stockage en redux du token et de l'id User
     function mapDispatchToProps(dispatch) {
       return {
           addToken: function (token) {

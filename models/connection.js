@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-// useNewUrlParser ;)
 var options = {
   connectTimeoutMS: 5000,
   useNewUrlParser: true,
@@ -14,7 +13,7 @@ mongoose.connect('mongodb+srv://admin:admin@cluster0.ir9pn.mongodb.net/gowizme?r
     if (err) {
       console.log(`error, failed to connect to the database because --> ${err}`);
     } else {
-      console.info('*** Database GoWizMe PERSONNEL connection : Success ***');
+      console.info('*** Database GoWizMe PERSONNEL CEDRIC connection : Success ***');
     }
    }
 );

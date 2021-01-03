@@ -10,6 +10,9 @@ import {connect} from 'react-redux'
 
 function Nav(props) {
 
+  // Création d'une formule selon que l'Id User soit stocké ou non dans le REDUX
+  // Si non stocké, alors tout clic sur un menu autre que "Evenements" amènera à l'écran de connexion 
+  // Si stocké, alors on peut envoyer vers les composants
   var navig;
   if (props.idUser ==='') {
     navig = <Menu style={{textAlign: 'center', backgroundColor:'#16253D', activeHover:'red'}} mode="horizontal" theme="dark">
@@ -78,11 +81,6 @@ function Nav(props) {
         Profil
       </Link>
     </Menu.Item>
-
-
-    
-
-    
   </Menu>
   }
     
@@ -96,7 +94,7 @@ function Nav(props) {
   );
 }
 
-
+// Récupération de l'ID user pour vérifier les liens à transmettre
 function mapStateToProps(state) {
   return {
       idUser: state.idUserReducer,
