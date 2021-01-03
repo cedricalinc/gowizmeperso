@@ -37,7 +37,6 @@ function App() {
         <Switch>
           <Route component={Home} path="/" exact />
           <Route component={Connexion} path="/connexion" exact />
-          {/* <Route component={ScreenArticlesBySource} path="/screenarticlesbysource/:id" exact /> */}
           <Route component={CreaSortie} path="/creation" exact />
           <Route component={DetailSortie} path="/sortie" exact />
           <Route component={Planifier} path="/planifier" exact />
