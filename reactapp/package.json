@@ -21,17 +21,14 @@
     "redux": "^4.0.5",
     "web-vitals": "^0.2.4"
   },
-  // "scripts": {
-  //   "start": "react-scripts start",
   "scripts": {
-    "start": "node index.js",
-    "heroku-postbuild": "cd client && npm install && npm run build",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
     
   },
-  "proxy": "http://localhost:3000",
+
   "eslintConfig": {
     "extends": [
       "react-app",
