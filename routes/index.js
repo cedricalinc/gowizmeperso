@@ -8,7 +8,7 @@ var friendRequestModel = require('../models/friendRequest')
 
 /* GET home page. */
 router.get('/', function (req, res, next) { 
-  res.render('./reactapp/src/components/App', { title: 'Express' });
+  res.render('/', { title: 'Express' });
 });
 
 
