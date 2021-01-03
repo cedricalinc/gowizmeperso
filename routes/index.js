@@ -12,7 +12,7 @@ var friendRequestModel = require('../models/friendRequest')
 // });
 
 router.get('/', function (req, res, next) { 
-  res.redirect('../reactapp/App');
+  res.redirect('../reactapp/src/components/App');
 });
 
 
