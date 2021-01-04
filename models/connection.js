@@ -7,7 +7,7 @@ var options = {
  };
 
 // --------------------- BDD -----------------------------------------------------
-mongoose.connect('mongodb+srv://admin:admin@cluster0.ir9pn.mongodb.net/gowizme?retryWrites=true&w=majority',
+mongoose.connect('',
    options,
    function(err) {
     if (err) {
