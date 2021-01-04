@@ -28,7 +28,7 @@
     "eject": "react-scripts eject"
     
   },
-  "proxy": "http://localhost:3000",
+  "proxy": "https://gowizmepersocedric.herokuapp.com",
   "eslintConfig": {
     "extends": [
       "react-app",
