@@ -69,10 +69,7 @@ test("profil", async (done) => {
   done()
   })
 
- 
-  
-
-test("recuperation d'un evenement", async (done) => {
+ test("recuperation d'un evenement", async (done) => {
     await request(app).post("/pullEventDetaille")
     .send({ "id": "5fce449e6697a656d4d4ea5f" })
     .expect(200)
